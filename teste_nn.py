@@ -1,6 +1,6 @@
 from random import random
 import numpy as np
-from RedeNeuralLuiz import NNL
+from RedeNeuralLuiz import NeuralNetwork
 from RedeNeuralCaio import NNC
 from utils import *
 
@@ -23,14 +23,13 @@ Y = np.array(([1, 1, 0, 0.85, 0.82], [0.78, 0.85, 0.04, 0.9, 0.9], [0.75, 0.8, 0
 def train500(nn):
     for i in range(500):
         if (i % 100 == 0):
-            print("Loss: " + str(np.mean(np.square(Y - nn.feed_forward(X)))))
+            print("Loss: " + str(round(compute_error(nn.feed_forward(X)), 4)))
 
-        nn.train(X, Y)
-    print()
+        nn.train(X, Y)    
 
-
-nn1 = NNL(2, 7, 5, random_2D_list(2, 7), random_2D_list(7, 5))
+nn1 = NeuralNetwork(2, 7, 5, random_2D_list(2, 7), random_2D_list(7, 5))
 train500(nn1)
-
-nn2 = NNC()
-train500(nn2)
+dif = abs(train_Y - nn1.A_2)
+print("Diferença:")
+print(str(np.round(dif, 4)))
+print(compute_error(nn1.A_2))

@@ -1,8 +1,7 @@
-from typing import List
 import numpy as np
 import random
 from utils import *
-from RedeNeuralLuiz import NNL
+from RedeNeuralLuiz import NeuralNetwork
 
 class GeneticAlgorithm:
     def __init__(
@@ -16,7 +15,7 @@ class GeneticAlgorithm:
 
         self.first_generation()
 
-    def obj_f(self, ind):
+    def objective_function(self, ind):
         input_layer_size = 2
         hidden_layer_size = 7
         output_layer_size = 5
@@ -29,25 +28,30 @@ class GeneticAlgorithm:
         weights_1_mat = weights_1_arr.reshape((input_layer_size, hidden_layer_size))
         weights_2_mat = weights_2_arr.reshape((hidden_layer_size, output_layer_size))
 
-        nn = NNL(input_layer_size, hidden_layer_size, output_layer_size, weights_1_mat, weights_2_mat)
+        nn = NeuralNetwork(input_layer_size, hidden_layer_size, output_layer_size, weights_1_mat, weights_2_mat)
+        output = nn.feed_forward(train_X)
 
-        return 1 / np.mean(np.square(train_Y - nn.feed_forward(train_X)))
+        return (1 / compute_error(output)), nn
 
     def get_gen_fitness(self, gen):
         fitness_array = []
+        nn_array = []
         for ind in gen:
-            fitness_array.append(self.obj_f(ind))
+            fitness, nn = self.objective_function(ind)
+            fitness_array.append(fitness)
+            nn_array.append(nn)
 
-        return fitness_array
+        return fitness_array, nn_array
 
     def first_generation(self):
         gen_1 = np.random.randn(self.n_ind, self.n_genes)
-        gen_1_fitness = self.get_gen_fitness(gen_1)
+        gen_1_fitness, gen_1_nn = self.get_gen_fitness(gen_1)
 
         self.last_gen = np.array(gen_1)
         self.last_gen_fitness = gen_1_fitness
         self.last_gen_best_fit_pos = np.argmax(gen_1_fitness)
         self.last_gen_best_fit = gen_1_fitness[self.last_gen_best_fit_pos]
+        self.last_gen_best_nn = gen_1_nn[self.last_gen_best_fit_pos]
         self.no_changes_best_fit = 0
 
     def random_parents(self, n_parents=2):
@@ -82,7 +86,7 @@ class GeneticAlgorithm:
             if (p <= self.p_crossover):
                 crossover = random.randint(1, self.n_genes-1)
                 child = np.concatenate(
-                    (self.last_gen[parents[0]][0:crossover], self.last_gen[parents[1]][crossover:self.n_genes]), axis=None)
+                    (self.last_gen[parents[0]][:crossover], self.last_gen[parents[1]][crossover:]), axis=None)
             else:
                 y = random.randint(0, 1)
                 child = self.last_gen[parents[y]][:]
@@ -96,7 +100,7 @@ class GeneticAlgorithm:
 
             new_gen.append(child)
 
-        new_gen_fitness = self.get_gen_fitness(new_gen)
+        new_gen_fitness, new_gen_nn = self.get_gen_fitness(new_gen)
         self.apply_elitism(new_gen, new_gen_fitness)
 
         new_gen_best_fit_pos = np.argmax(new_gen_fitness) # descobre quem é o indivíduo com o melhor fitness da nova geração
@@ -107,6 +111,7 @@ class GeneticAlgorithm:
             self.no_changes_best_fit = 0 # zera o contador para indicar que houve uma mudança
             self.last_gen_best_fit = new_gen_best_fit # atualiza o valor do melhor fitness
             self.last_gen_best_fit_pos = new_gen_best_fit_pos # atualiza a posição do indivíduo com melhor fitness
+            self.last_gen_best_nn = new_gen_nn[new_gen_best_fit_pos]
 
         self.last_gen = new_gen
         self.last_gen_fitness = new_gen_fitness

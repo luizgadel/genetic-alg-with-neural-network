@@ -1,6 +1,6 @@
 import numpy as np
 
-class NNL:
+class NeuralNetwork:
     def __init__(self, input_size, hidden_size, output_size, weights_1, weights_2):
         #parameters
         self.input_size = input_size
