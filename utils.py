@@ -14,3 +14,6 @@ def get_roulette_wheel(array):
         anterior = nova_pos
     
     return roulette_wheel
+
+def random_2D_list(dimension_1_size, dimension_2_size):
+    return np.random.randn(dimension_1_size, dimension_2_size)

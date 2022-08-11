@@ -1,6 +1,8 @@
+from random import random
 import numpy as np
 from RedeNeuralLuiz import NNL
 from RedeNeuralCaio import NNC
+from utils import *
 
 X = np.array(([0, 0], [0, 0.27], [0, 0.71],
               [0.3, 0.27], [0.3, 0.71], [0.3, 1],
@@ -27,7 +29,7 @@ def train500(nn):
     print()
 
 
-nn1 = NNL(2, 7, 5)
+nn1 = NNL(2, 7, 5, random_2D_list(2, 7), random_2D_list(7, 5))
 train500(nn1)
 
 nn2 = NNC()

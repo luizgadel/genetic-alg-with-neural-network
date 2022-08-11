@@ -1,18 +1,18 @@
 import numpy as np
 
-def random_weight_list(input_size, output_size):
-    return np.random.randn(input_size, output_size)
-
 class NNL:
-    def __init__(self, input_size, hidden_size, output_size):
+    def __init__(self, input_size, hidden_size, output_size, weights_1, weights_2):
         #parameters
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
         
+        '''
+        Os pesos precisarão ser definidos através do construtor.
+        '''
         #weights
-        self.W1 = random_weight_list(input_size, hidden_size)
-        self.W2 = random_weight_list(hidden_size, output_size)
+        self.W1 = weights_1
+        self.W2 = weights_2
         
     def sigmoid(self, s, deriv = False):
         if (deriv == True):
