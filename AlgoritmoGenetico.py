@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 import random
 from utils import *
-
+from RedeNeuralLuiz import NNL
 
 class GeneticAlgorithm:
     def __init__(
@@ -17,7 +17,21 @@ class GeneticAlgorithm:
         self.first_generation()
 
     def obj_f(self, ind):
-        return sum(ind)
+        input_layer_size = 2
+        hidden_layer_size = 7
+        output_layer_size = 5
+
+        weights_1_arr_size = input_layer_size*hidden_layer_size
+
+        weights_1_arr = np.array(ind[:weights_1_arr_size])
+        weights_2_arr = np.array(ind[weights_1_arr_size:])
+
+        weights_1_mat = weights_1_arr.reshape((input_layer_size, hidden_layer_size))
+        weights_2_mat = weights_2_arr.reshape((hidden_layer_size, output_layer_size))
+
+        nn = NNL(input_layer_size, hidden_layer_size, output_layer_size, weights_1_mat, weights_2_mat)
+
+        return 1 / np.mean(np.square(train_Y - nn.feed_forward(train_X)))
 
     def get_gen_fitness(self, gen):
         fitness_array = []
@@ -27,7 +41,7 @@ class GeneticAlgorithm:
         return fitness_array
 
     def first_generation(self):
-        gen_1 = np.random.rand(self.n_ind, self.n_genes)
+        gen_1 = np.random.randn(self.n_ind, self.n_genes)
         gen_1_fitness = self.get_gen_fitness(gen_1)
 
         self.last_gen = np.array(gen_1)
@@ -62,7 +76,7 @@ class GeneticAlgorithm:
         for i in range(self.n_ind):
             parents = self.random_parents()
 
-            p = random.random()
+            p = np.random.rand()
 
             ''' crossover '''
             if (p <= self.p_crossover):
@@ -75,9 +89,9 @@ class GeneticAlgorithm:
 
             ''' mutação '''
             for j in range(self.n_genes):
-                p = random.random()
+                p = np.random.rand()
                 if (p <= self.p_mutation):
-                    random_gene = np.random.rand()
+                    random_gene = np.random.randn()
                     child[j] = random_gene
 
             new_gen.append(child)
