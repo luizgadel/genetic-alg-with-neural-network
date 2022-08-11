@@ -4,10 +4,16 @@ ag = GeneticAlgorithm(5, 5)
 
 print(ag.last_gen)
 
-print(f"Melhor fitness da geração 0:")
-print(max(ag.last_gen_fitness))
+print(f"Geração 0:")
+print(f"{ag.last_gen[ag.last_gen_best_fit_pos]} ---> {ag.last_gen_best_fit}")
 
-for i in range(1, 500):
+i = 0
+while(ag.no_changes_best_fit < 500):
     ag.new_generation()
-    print(f"Melhor fitness da geração {i}:")
-    print(max(ag.last_gen_fitness))
+    i += 1
+
+    if (ag.no_changes_best_fit == 0):
+        print(f"Geração {i}:")
+        print(f"{ag.last_gen[ag.last_gen_best_fit_pos]} ---> {ag.last_gen_best_fit}")
+
+print(f"Fim do algoritmo genético. Número de gerações: {i}")

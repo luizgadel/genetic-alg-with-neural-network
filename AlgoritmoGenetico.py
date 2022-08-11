@@ -1,6 +1,7 @@
 from typing import List
 import numpy as np
 import random
+from utils import *
 
 
 class GeneticAlgorithm:
@@ -18,47 +19,43 @@ class GeneticAlgorithm:
     def obj_f(self, ind):
         return sum(ind)
 
-    def get_roulette_wheel(self):
-        arr = self.last_gen_fitness / \
-            np.sum(self.last_gen_fitness)
-        acumulador = []
-        anterior = 0
-        for i in range(self.n_ind):
-            atual = round(arr[i]*10000000)
-            nova_pos = anterior + atual
-            acumulador.append(nova_pos)
-            anterior = nova_pos
-        return acumulador
-
-    def get_last_gen_fitness(self):
+    def get_gen_fitness(self, gen):
         fitness_array = []
-        for ind in self.last_gen:
+        for ind in gen:
             fitness_array.append(self.obj_f(ind))
 
-        self.last_gen_fitness = fitness_array
-
-        self.roulette_wheel = self.get_roulette_wheel()
+        return fitness_array
 
     def first_generation(self):
         gen_1 = np.random.rand(self.n_ind, self.n_genes)
+        gen_1_fitness = self.get_gen_fitness(gen_1)
+
         self.last_gen = np.array(gen_1)
-        self.get_last_gen_fitness()
+        self.last_gen_fitness = gen_1_fitness
+        self.last_gen_best_fit_pos = np.argmax(gen_1_fitness)
+        self.last_gen_best_fit = gen_1_fitness[self.last_gen_best_fit_pos]
+        self.no_changes_best_fit = 0
 
     def random_parents(self, n_parents=2):
-        limite = self.roulette_wheel[self.n_ind - 1]
+        roulette_wheel = get_roulette_wheel(self.last_gen_fitness)
+        limite = max(roulette_wheel)
 
         parent_array = []
         for i in range(n_parents):
             new_parent = random.randint(0, limite)
 
             parent_position = 0
-            while (new_parent > self.roulette_wheel[parent_position]):
+            while (new_parent > roulette_wheel[parent_position]):
                 parent_position += 1
 
             parent_array.append(parent_position)
         return parent_array
 
-    # def apply_elitism(self):
+    def apply_elitism(self, gen, gen_fitness):
+        worst_fit_pos = np.argmin(gen_fitness) # descobre a posição do indivíduo com o pior fitness da nova geração
+
+        gen[worst_fit_pos] = self.last_gen[self.last_gen_best_fit_pos] # substitui esse indivíduo pelo melhor da geração passada
+        gen_fitness[worst_fit_pos] = self.last_gen_best_fit # atualiza o fitness do novo indivíduo
 
     def new_generation(self):
         new_gen = []
@@ -85,9 +82,17 @@ class GeneticAlgorithm:
 
             new_gen.append(child)
 
+        new_gen_fitness = self.get_gen_fitness(new_gen)
+        self.apply_elitism(new_gen, new_gen_fitness)
+
+        new_gen_best_fit_pos = np.argmax(new_gen_fitness) # descobre quem é o indivíduo com o melhor fitness da nova geração
+        new_gen_best_fit = new_gen_fitness[new_gen_best_fit_pos] # guarda o valor de fitness desse indivíduo
+        if (new_gen_best_fit == self.last_gen_best_fit): # se o melhor fitness da nova geração é igual ao melhor fitness da geração passada
+            self.no_changes_best_fit += 1 # incrementa 1 no contador que indica falta de mudanças no melhor fitness
+        else: # senão
+            self.no_changes_best_fit = 0 # zera o contador para indicar que houve uma mudança
+            self.last_gen_best_fit = new_gen_best_fit # atualiza o valor do melhor fitness
+            self.last_gen_best_fit_pos = new_gen_best_fit_pos # atualiza a posição do indivíduo com melhor fitness
+
         self.last_gen = new_gen
-        # self.apply_elitism()
-        '''Vou precisar alterar a função que calcula fitness pois do jeito atual ela sobrescreve 
-        o fitness da geração anterior com o da nova geração. No entanto, para aplicar elitismo, 
-        vou precisar ter os dois fitness ao mesmo tempo.'''
-        self.get_last_gen_fitness()
+        self.last_gen_fitness = new_gen_fitness
