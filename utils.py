@@ -55,3 +55,9 @@ train_Y = np.array(([1, 1, 0, 0.85, 0.82],
 
 def compute_error(array):
     return np.mean(np.square(train_Y - array))
+
+def train_neural_network(nn, n_gen):
+    for i in range(n_gen):
+        nn.train(train_X, train_Y)    
+
+
