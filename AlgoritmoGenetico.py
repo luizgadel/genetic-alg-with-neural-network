@@ -20,13 +20,13 @@ class GeneticAlgorithm:
         hidden_layer_size = 7
         output_layer_size = 5
 
-        weights_1_arr_size = input_layer_size*hidden_layer_size
+        weights_1_arr_size = (input_layer_size+1)*hidden_layer_size
 
         weights_1_arr = np.array(ind[:weights_1_arr_size])
         weights_2_arr = np.array(ind[weights_1_arr_size:])
 
-        weights_1_mat = weights_1_arr.reshape((input_layer_size, hidden_layer_size))
-        weights_2_mat = weights_2_arr.reshape((hidden_layer_size, output_layer_size))
+        weights_1_mat = weights_1_arr.reshape((input_layer_size+1, hidden_layer_size))
+        weights_2_mat = weights_2_arr.reshape((hidden_layer_size+1, output_layer_size))
 
         nn = NeuralNetwork(input_layer_size, hidden_layer_size, output_layer_size, weights_1_mat, weights_2_mat)
         output = nn.feed_forward(train_X)

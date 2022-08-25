@@ -4,7 +4,7 @@ import time
 
 starting_time = time.time()
 
-ag = GeneticAlgorithm(20, 49)
+ag = GeneticAlgorithm(20, 61)
 n_gens = 10000
 for i in range(n_gens):
     ag.new_generation()

@@ -22,11 +22,12 @@ class NeuralNetwork:
         
     def feed_forward(self, X):
         #foward propagation through the network
-        X_extended = np.column_stack(X, np.ones(self.input_size)) #adiciono uma coluna de 1s para soma do bias no produto de matrizes. Res.: (Tx3)
+        train_size = X.shape[0]
+        X_extended = np.column_stack((X, np.ones(train_size))) #adiciono uma coluna de 1s para soma do bias no produto de matrizes. Res.: (Tx3)
         dot_product_A_1 = np.dot(X_extended, self.W1) #dot product of X (input, Tx3) and first set of weights (3x7). Res.: (Tx7)
         self.A_1 = self.sigmoid(dot_product_A_1) #activation function, (Tx7)
         
-        A_1_extended = np.column_stack(self.A_1, np.ones(self.hidden_size)) #adiciono uma coluna de 1s para soma do bias no produto de matrizes. Res.: (Tx8)
+        A_1_extended = np.column_stack((self.A_1, np.ones(train_size))) #adiciono uma coluna de 1s para soma do bias no produto de matrizes. Res.: (Tx8)
         dot_product_A_2 = np.dot(A_1_extended, self.W2) #dot product of hidden Layer (A_1, Tx8) and second set of weights (8x5). Res.: (Tx5)
         self.A_2 = self.sigmoid(dot_product_A_2) #(Tx5)
         return self.A_2
