@@ -1,13 +1,12 @@
 import numpy as np
 from RedeNeuralLuiz import NeuralNetwork
-from RedeNeuralCaio import NNC
 from utils import *
 import time
 
 starting_time = time.time()
 
-nn = NeuralNetwork(2, 7, 5, random_2D_list(2, 7), random_2D_list(7, 5))
-n_gens = 1000000
+nn = NeuralNetwork(2, 7, 5, random_2D_list(3, 7), random_2D_list(8, 5))
+n_gens = 1_000_000
 train_neural_network(nn, n_gens)
 
 ending_time = time.time()
