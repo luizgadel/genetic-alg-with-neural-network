@@ -1,7 +1,9 @@
 import numpy as np
-import random
+import random as rand
 from utils import *
 from RedeNeuralLuiz import NeuralNetwork
+from network import Network
+
 
 class GeneticAlgorithm:
     def __init__(
@@ -16,22 +18,26 @@ class GeneticAlgorithm:
         self.first_generation()
 
     def objective_function(self, ind):
-        input_layer_size = 2
-        hidden_layer_size = 7
-        output_layer_size = 5
+        il_size = 2
+        hl_size = 7
+        ol_size = 5
 
-        weights_1_arr_size = (input_layer_size+1)*hidden_layer_size
+        w1_size = il_size * hl_size
+        wb1_size = w1_size + hl_size
+        w2_size = hl_size * ol_size
 
-        weights_1_arr = np.array(ind[:weights_1_arr_size])
-        weights_2_arr = np.array(ind[weights_1_arr_size:])
+        wb1 = np.array(ind[:wb1_size])
+        wb2 = np.array(ind[wb1_size:])
+        weights_1, biases_1 = split_weights_and_biases(wb1, il_size, hl_size)
+        weights_2, biases_2 = split_weights_and_biases(wb2, hl_size, ol_size)
 
-        weights_1_mat = weights_1_arr.reshape((input_layer_size+1, hidden_layer_size))
-        weights_2_mat = weights_2_arr.reshape((hidden_layer_size+1, output_layer_size))
+        weights = [weights_1, weights_2]
+        biases = [biases_1, biases_2]
 
-        nn = NeuralNetwork(input_layer_size, hidden_layer_size, output_layer_size, weights_1_mat, weights_2_mat)
-        output = nn.feed_forward(train_X)
+        nn = Network(il_size, hl_size, ol_size, weights, biases)
+        nn.update_mini_batch(train_X, train_Y, 1)
 
-        return (1 / compute_error(output)), nn
+        return (1 / nn.cost()), nn
 
     def get_gen_fitness(self, gen):
         fitness_array = []
@@ -60,7 +66,7 @@ class GeneticAlgorithm:
 
         parent_array = []
         for i in range(n_parents):
-            new_parent = random.randint(0, limite)
+            new_parent = rand.randint(0, limite)
 
             parent_position = 0
             while (new_parent > roulette_wheel[parent_position]):
@@ -70,10 +76,13 @@ class GeneticAlgorithm:
         return parent_array
 
     def apply_elitism(self, gen, gen_fitness):
-        worst_fit_pos = np.argmin(gen_fitness) # descobre a posição do indivíduo com o pior fitness da nova geração
+        # descobre a posição do indivíduo com o pior fitness da nova geração
+        worst_fit_pos = np.argmin(gen_fitness)
 
-        gen[worst_fit_pos] = self.last_gen[self.last_gen_best_fit_pos] # substitui esse indivíduo pelo melhor da geração passada
-        gen_fitness[worst_fit_pos] = self.last_gen_best_fit # atualiza o fitness do novo indivíduo
+        # substitui esse indivíduo pelo melhor da geração passada
+        gen[worst_fit_pos] = self.last_gen[self.last_gen_best_fit_pos]
+        # atualiza o fitness do novo indivíduo
+        gen_fitness[worst_fit_pos] = self.last_gen_best_fit
 
     def new_generation(self):
         new_gen = []
@@ -84,11 +93,11 @@ class GeneticAlgorithm:
 
             ''' crossover '''
             if (p <= self.p_crossover):
-                crossover = random.randint(1, self.n_genes-1)
+                crossover = rand.randint(1, self.n_genes-1)
                 child = np.concatenate(
                     (self.last_gen[parents[0]][:crossover], self.last_gen[parents[1]][crossover:]), axis=None)
             else:
-                y = random.randint(0, 1)
+                y = rand.randint(0, 1)
                 child = self.last_gen[parents[y]][:]
 
             ''' mutação '''
@@ -103,14 +112,19 @@ class GeneticAlgorithm:
         new_gen_fitness, new_gen_nn = self.get_gen_fitness(new_gen)
         self.apply_elitism(new_gen, new_gen_fitness)
 
-        new_gen_best_fit_pos = np.argmax(new_gen_fitness) # descobre quem é o indivíduo com o melhor fitness da nova geração
-        new_gen_best_fit = new_gen_fitness[new_gen_best_fit_pos] # guarda o valor de fitness desse indivíduo
-        if (new_gen_best_fit == self.last_gen_best_fit): # se o melhor fitness da nova geração é igual ao melhor fitness da geração passada
-            self.no_changes_best_fit += 1 # incrementa 1 no contador que indica falta de mudanças no melhor fitness
-        else: # senão
-            self.no_changes_best_fit = 0 # zera o contador para indicar que houve uma mudança
-            self.last_gen_best_fit = new_gen_best_fit # atualiza o valor do melhor fitness
-            self.last_gen_best_fit_pos = new_gen_best_fit_pos # atualiza a posição do indivíduo com melhor fitness
+        # descobre quem é o indivíduo com o melhor fitness da nova geração
+        new_gen_best_fit_pos = np.argmax(new_gen_fitness)
+        # guarda o valor de fitness desse indivíduo
+        new_gen_best_fit = new_gen_fitness[new_gen_best_fit_pos]
+        # se o melhor fitness da nova geração é igual ao melhor fitness da geração passada
+        if (new_gen_best_fit == self.last_gen_best_fit):
+            # incrementa 1 no contador que indica falta de mudanças no melhor fitness
+            self.no_changes_best_fit += 1
+        else:  # senão
+            self.no_changes_best_fit = 0  # zera o contador para indicar que houve uma mudança
+            self.last_gen_best_fit = new_gen_best_fit  # atualiza o valor do melhor fitness
+            # atualiza a posição do indivíduo com melhor fitness
+            self.last_gen_best_fit_pos = new_gen_best_fit_pos
             self.last_gen_best_nn = new_gen_nn[new_gen_best_fit_pos]
 
         self.last_gen = new_gen
