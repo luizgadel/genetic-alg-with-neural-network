@@ -38,6 +38,7 @@ class Network:
         nabla_w = [np.zeros(w.shape) for w in self.weights]
 
         # feedforward
+        self.outputs = []
         activation = np.array(x, ndmin=2)
         # list to store all the activations, layer by layer
         self.activations = []
@@ -48,6 +49,8 @@ class Network:
             zs.append(z)
             activation = self.sigmoid(z)
             self.activations.append(activation)
+
+        self.outputs.append(activation)
 
         # backward pass
         delta = self.cost_derivative(self.activations[-1], y) * \
@@ -100,7 +103,8 @@ class Network:
                        nb in zip(self.biases, nabla_b)]
 
     def cost(self):
-        return np.mean(np.square(self.Y - self.activations[-1]))
+        square_error = np.square(self.Y - self.activations[-1])
+        return np.mean(square_error), square_error
 
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /

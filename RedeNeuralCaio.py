@@ -40,6 +40,15 @@ class NeuralNetwork:
         self.W1 += np.dot(X.T, self.delta_1) #adjusting first set (input -> hidden) weights
         self.W2 += np.dot(self.A_1.T, self.delta_2) #adjusting second set (hidden -> output) weights
         
-    def train(self, X, Y):
+    def update_mini_batc(self, X, Y):
         self.feed_forward(X)
         self.backward_propagation(X, Y)
+
+    def train(self, X, Y):
+        self.X = X
+        self.Y = Y
+        self.outputs = []
+        for x, y in zip(X, Y):
+            output = self.feed_forward(x)
+            self.outputs.append(output)
+            # backprop(x, y)

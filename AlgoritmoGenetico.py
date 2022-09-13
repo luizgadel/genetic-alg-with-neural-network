@@ -1,7 +1,7 @@
 import numpy as np
 import random as rand
 from utils import *
-from RedeNeuralLuiz import NeuralNetwork
+from RedeNeuralCaio import NeuralNetwork
 from network import Network
 
 
@@ -37,9 +37,12 @@ class GeneticAlgorithm:
         nn = Network(il_size, hl_size, ol_size, weights, biases)
         nn.update_mini_batch(train_X, train_Y, 1)
 
-        return (1 / nn.cost()), nn
+        train_cost, train_square_error = nn.cost()
+
+        return (1 / train_cost), nn
 
     def get_gen_fitness(self, gen):
+        '''returns the fitness array and the neural network array of the generation'''
         fitness_array = []
         nn_array = []
         for ind in gen:
